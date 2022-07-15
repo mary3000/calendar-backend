@@ -73,7 +73,7 @@ func DecideOnMeeting(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, res.Error.Error(), http.StatusBadRequest)
 		return
 	}
-	log.Printf("Added user: %v", req)
+	log.Printf("Decided on slot: %+v", slot)
 
 	_, _ = w.Write([]byte(fmt.Sprintf("%v", slot)))
 }

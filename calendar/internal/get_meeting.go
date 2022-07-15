@@ -3,6 +3,7 @@ package internal
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 )
 
@@ -41,15 +42,25 @@ func GetMeeting(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, _ = w.Write([]byte(fmt.Sprintf("Meeting details: \n"+
-		"{\n"+
-		"MeetingName: %v, \n"+
-		"Guests: %v, \n"+
-		"HostName: %v, \n"+
-		"StartDate: %v, \n"+
-		"EndDate: %v, \n"+
-		"Frequency: %v \n"+
-		"} \n"+
-		"obj: \n"+
-		"%v", m.MeetingName, m.Guests, m.HostName, m.StartDate, m.EndDate, m.Frequency, m)))
+	log.Printf("Got meeting: %+v", m)
+
+	/*_, _ = w.Write([]byte(fmt.Sprintf("Meeting details: \n"+
+	"{\n"+
+	"MeetingName: %v, \n"+
+	"Guests: %v, \n"+
+	"HostName: %v, \n"+
+	"StartDate: %v, \n"+
+	"EndDate: %v, \n"+
+	"Frequency: %v \n"+
+	"} \n"+
+	"obj: \n"+
+	"%v", m.MeetingName, m.Guests, m.HostName, m.StartDate, m.EndDate, m.Frequency, m)))*/
+
+	payloadBytes, err := json.Marshal(m)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	_, _ = w.Write(payloadBytes)
 }

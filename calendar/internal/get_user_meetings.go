@@ -3,6 +3,8 @@ package internal
 import (
 	"encoding/json"
 	"fmt"
+	"golang.org/x/exp/slices"
+	"log"
 	"net/http"
 	"time"
 )
@@ -48,7 +50,15 @@ func GetUserMeetings(w http.ResponseWriter, r *http.Request) {
 
 	mts := GetMeetingsInInterval(meetingSlots, req.BeginDate, req.EndDate)
 
-	_, _ = w.Write([]byte(fmt.Sprintf("%v", mts)))
+	log.Printf("Got user meetings: %+v", mts)
+
+	payloadBytes, err := json.Marshal(mts)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	_, _ = w.Write(payloadBytes)
 }
 
 func GetMeetingsInInterval(meetingSlots []MeetingSlot, begin time.Time, end time.Time) []MeetingTimeSlot {
@@ -65,6 +75,10 @@ func GetMeetingsInInterval(meetingSlots []MeetingSlot, begin time.Time, end time
 }
 
 func GetUnrepeatedMeetings(ms MeetingSlot, m Meeting, begin time.Time, end time.Time) []MeetingTimeSlot {
+	if ms.DefaultDecision != Accepted {
+		return []MeetingTimeSlot{}
+	}
+
 	if !(m.StartDate.After(end) || m.EndDate.Before(begin)) {
 		return []MeetingTimeSlot{{
 			Slot:              ms,
@@ -127,11 +141,14 @@ func GetMeetings(ms MeetingSlot, m Meeting, begin time.Time, end time.Time) []Me
 	acceptedTimes := make([]MeetingTimeSlot, 0)
 
 	for !(cur.After(end)) {
-		acceptedTimes = append(acceptedTimes, MeetingTimeSlot{
-			Slot:              ms,
-			ConcreteTimeStart: cur,
-			ConcreteTimeEnd:   cur.Add(m.EndDate.Sub(m.StartDate)),
-		})
+		if ms.DefaultDecision == Accepted && slices.Index(ms.OppositeDecisionDates, cur) == -1 ||
+			ms.DefaultDecision != Accepted && slices.Index(ms.OppositeDecisionDates, cur) != -1 {
+			acceptedTimes = append(acceptedTimes, MeetingTimeSlot{
+				Slot:              ms,
+				ConcreteTimeStart: cur,
+				ConcreteTimeEnd:   cur.Add(m.EndDate.Sub(m.StartDate)),
+			})
+		}
 		years, months, days = m.Frequency.Next(years, months, days)
 		cur = m.StartDate.AddDate(years, months, days)
 	}

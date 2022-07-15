@@ -1,7 +1,9 @@
 package internal
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 )
 
@@ -27,5 +29,13 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, _ = w.Write([]byte(fmt.Sprint(users)))
+	log.Printf("Got users: %+v", users)
+
+	payloadBytes, err := json.Marshal(users)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	_, _ = w.Write(payloadBytes)
 }

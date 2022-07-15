@@ -35,7 +35,7 @@ const (
 type Meeting struct {
 	gorm.Model
 
-	Guests []*User `gorm:"many2many:user_languages;"` // including host
+	Guests []*User `gorm:"many2many:user_meeting;"` // including host
 	Slots  []MeetingSlot
 
 	MeetingName string

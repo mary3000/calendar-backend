@@ -17,7 +17,6 @@ type AddMeetingRequest struct {
 	Frequency   string
 }
 
-// param: username, []guests_names, meeting_name, time, length, repeated: [no, d, w, m, a]
 func AddMeeting(w http.ResponseWriter, r *http.Request) {
 	contentType := r.Header.Get("Content-type")
 	expectedContentType := "application/json"
@@ -38,12 +37,6 @@ func AddMeeting(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-
-	/*users := make([]User, len(req.Guests) + 1)
-	users[0].Username = req.Hostname
-	for i, _ := range req.Guests {
-		users[i+1].Username = req.Guests[i]
-	}*/
 
 	var retrievedUsers []User
 	allUsers := append(req.Guests, req.Hostname)
@@ -73,7 +66,7 @@ func AddMeeting(w http.ResponseWriter, r *http.Request) {
 		Db.Model(&createdMeeting).Association("MeetingSlots").Append(&slot)
 	}
 
-	log.Printf("Added meeting: %v", createdMeeting)
+	log.Printf("Added meeting: %+v", createdMeeting)
 
-	_, _ = w.Write([]byte(fmt.Sprint(createdMeeting)))
+	_, _ = w.Write([]byte(fmt.Sprint(createdMeeting.ID)))
 }

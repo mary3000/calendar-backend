@@ -40,8 +40,8 @@ func AddUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Printf("Added user: %v", req)
+	log.Printf("Added user: %+v", user)
 
-	_, _ = w.Write([]byte(fmt.Sprint(user)))
+	_, _ = w.Write([]byte(fmt.Sprint(user.ID)))
 	//_, _ = w.Write([]byte(fmt.Sprintf("User id: %v", user.ID)))
 }

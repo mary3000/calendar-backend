@@ -3,6 +3,7 @@ package internal
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"time"
 )
@@ -66,5 +67,13 @@ Again:
 		}
 	}
 
-	_, _ = w.Write([]byte(fmt.Sprintf("%v", curTime)))
+	log.Printf("Closest time: %v", curTime)
+
+	payloadBytes, err := json.Marshal(curTime)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	_, _ = w.Write(payloadBytes)
 }
