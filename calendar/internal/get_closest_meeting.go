@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-type GetClosesMeetingRequest struct {
+type GetClosestMeetingRequest struct {
 	Names    []string
 	Duration string
 }
@@ -27,7 +27,7 @@ func GetClosestMeeting(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf("Method: expected %v, got %v", expectedMethod, r.Method), http.StatusBadRequest)
 	}
 
-	var req GetClosesMeetingRequest
+	var req GetClosestMeetingRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -39,7 +39,7 @@ func GetClosestMeeting(w http.ResponseWriter, r *http.Request) {
 
 	meetingSlots := make([][]MeetingSlot, len(users))
 	for i := range users {
-		Db.Where("user_id = ?", users[i]).Find(&meetingSlots[i])
+		Db.Where("user_id = ?", users[i].ID).Find(&meetingSlots[i])
 	}
 
 	curTime := time.Now().Add(time.Minute)

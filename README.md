@@ -75,5 +75,28 @@ Sample answer:
 5. Get all user meetings, that occur in the specified time interval.
 
 ```bash
+curl --location --request POST 'localhost:9000/get-user-meetings' \
+--header 'Content-Type: application/json' \
+--data-raw '{"username": "Mary",
+"begindate": "2021-07-15T19:42:31.000+03:00",
+"enddate": "2023-07-15T19:42:31.000+03:00"}'
+```
 
+Sample answer:
+```json
+[{"Slot":{"ID":1,"CreatedAt":"2022-07-15T19:37:27.569429049+03:00","UpdatedAt":"2022-07-15T21:35:06.990447896+03:00","DeletedAt":null,"MeetingID":1,"UserID":2,"DefaultDecision":1,"OppositeDecisionDates":null},"ConcreteTimeStart":"2022-07-15T19:42:31+03:00","ConcreteTimeEnd":"2022-07-15T20:42:31+03:00"},{"Slot":{"ID":3,"CreatedAt":"2022-07-15T19:43:32.853959694+03:00","UpdatedAt":"2022-07-15T21:36:51.638948535+03:00","DeletedAt":null,"MeetingID":2,"UserID":2,"DefaultDecision":1,"OppositeDecisionDates":null},"ConcreteTimeStart":"2022-07-16T19:42:31+03:00","ConcreteTimeEnd":"2022-07-16T20:42:31+03:00"},{"Slot":{"ID":5,"CreatedAt":"2022-07-15T19:44:27.23855388+03:00","UpdatedAt":"2022-07-15T21:37:10.896243389+03:00","DeletedAt":null,"MeetingID":3,"UserID":2,"DefaultDecision":1,"OppositeDecisionDates":null},"ConcreteTimeStart":"2022-07-15T19:42:31+03:00","ConcreteTimeEnd":"2022-07-15T20:42:31+03:00"}]
+```
+
+6. Get the nearest time in which all the given users a free for a given period of time.
+
+```bash
+curl --location --request POST 'localhost:9000/get-closest-meeting' \
+--header 'Content-Type: application/json' \
+--data-raw '{"names": ["Mary", "Susan"],
+"duration": "1h"}'
+```
+
+Sample answer:
+```json
+"2022-07-15T22:03:26.778937897+03:00"
 ```
