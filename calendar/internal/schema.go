@@ -9,8 +9,9 @@ import (
 type User struct {
 	gorm.Model
 
-	Username string     `gorm:"unique"`
 	Meetings []*Meeting `gorm:"many2many:user_meeting;"`
+
+	Username string `gorm:"unique"`
 }
 
 // Types of meetings:
@@ -24,22 +25,41 @@ type User struct {
 type MeetingFrequency string
 
 const (
-	Unrepeated = "u"
-	Daily      = "d"
-	Weekly     = "w"
-	Monthly    = "m"
-	Annually   = 'a'
+	Unrepeated MeetingFrequency = "u"
+	Daily                       = "d"
+	Weekly                      = "w"
+	Monthly                     = "m"
+	Annually                    = "a"
 )
 
 type Meeting struct {
 	gorm.Model
 
+	Guests []*User `gorm:"many2many:user_languages;"` // including host
+	Slots  []MeetingSlot
+
 	MeetingName string
-	Guests      []*User `gorm:"many2many:user_meeting;"`
 	HostName    string
 	StartDate   time.Time
 	EndDate     time.Time
 	Frequency   MeetingFrequency
+}
+
+type Decision uint
+
+const (
+	Unknown Decision = iota
+	Accepted
+	Declined
+)
+
+type MeetingSlot struct {
+	gorm.Model
+
+	MeetingID             uint // foreign key
+	UserID                uint
+	DefaultDecision       Decision
+	OppositeDecisionDates []time.Time
 }
 
 var Db *gorm.DB

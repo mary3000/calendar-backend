@@ -7,8 +7,9 @@ import (
 )
 
 type GetMeetingRequest struct {
-	Hostname    string
-	MeetingName string
+	// Hostname    string
+	// MeetingName string
+	MeetingID uint
 }
 
 // param: hostname, meeting_name (unique per user!)
@@ -26,15 +27,15 @@ func GetMeeting(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf("Method: expected %v, got %v", expectedMethod, r.Method), http.StatusBadRequest)
 	}
 
-	var u GetMeetingRequest
-	err := json.NewDecoder(r.Body).Decode(&u)
+	var req GetMeetingRequest
+	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	var m Meeting
-	res := Db.Where(&Meeting{HostName: u.Hostname, MeetingName: u.MeetingName}).First(&m)
+	res := Db.Preload("Guests").Preload("Slots").First(&m, req.MeetingID)
 	if res.Error != nil {
 		http.Error(w, res.Error.Error(), http.StatusBadRequest)
 		return
@@ -48,5 +49,7 @@ func GetMeeting(w http.ResponseWriter, r *http.Request) {
 		"StartDate: %v, \n"+
 		"EndDate: %v, \n"+
 		"Frequency: %v \n"+
-		"}", m.MeetingName, m.Guests, m.HostName, m.StartDate, m.EndDate, m.Frequency)))
+		"} \n"+
+		"obj: \n"+
+		"%v", m.MeetingName, m.Guests, m.HostName, m.StartDate, m.EndDate, m.Frequency, m)))
 }

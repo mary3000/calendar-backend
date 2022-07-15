@@ -5,7 +5,6 @@ import (
 	"net/http"
 )
 
-// param: name
 func GetUsers(w http.ResponseWriter, r *http.Request) {
 	contentType := r.Header.Get("Content-type")
 	expectedContentType := "application/json"

@@ -3,10 +3,16 @@ package internal
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
+	"time"
 )
 
+type GetClosesMeetingRequest struct {
+	Names    []string
+	Duration string
+}
+
+// param: []names, length
 func GetClosestMeeting(w http.ResponseWriter, r *http.Request) {
 	contentType := r.Header.Get("Content-type")
 	expectedContentType := "application/json"
@@ -21,20 +27,44 @@ func GetClosestMeeting(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf("Method: expected %v, got %v", expectedMethod, r.Method), http.StatusBadRequest)
 	}
 
-	var u AddUserRequest
-	err := json.NewDecoder(r.Body).Decode(&u)
+	var req GetClosesMeetingRequest
+	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	user := &User{Username: u.Username}
-	res := Db.Create(user)
-	if res.Error != nil {
-		http.Error(w, res.Error.Error(), http.StatusBadRequest)
+	var users []User
+	Db.Where("username IN (?)", req.Names).Find(&users)
+
+	meetingSlots := make([][]MeetingSlot, len(users))
+	for i := range users {
+		Db.Where("UserID = ?", users[i]).Find(&meetingSlots[i])
+	}
+
+	curTime := time.Now().Add(time.Minute)
+	length, err := time.ParseDuration(req.Duration)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	log.Printf("Added user: %v", u)
 
-	_, _ = w.Write([]byte(fmt.Sprintf("User id: %v", user.ID)))
+	// potentially infinite!
+	// todo: make loop finite
+Again:
+	for i := range users {
+		for _, ms := range meetingSlots[i] {
+			var m Meeting
+			Db.Find(&m, ms.MeetingID)
+			slotsInInterval := GetMeetings(ms, m, curTime, curTime.Add(length))
+			for _, mts := range slotsInInterval {
+				if mts.ConcreteTimeEnd.After(curTime) {
+					curTime = mts.ConcreteTimeEnd
+					goto Again
+				}
+			}
+		}
+	}
+
+	_, _ = w.Write([]byte(fmt.Sprintf("%v", curTime)))
 }

@@ -32,38 +32,45 @@ func AddMeeting(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf("Method: expected %v, got %v", expectedMethod, r.Method), http.StatusBadRequest)
 	}
 
-	var m AddMeetingRequest
-	err := json.NewDecoder(r.Body).Decode(&m)
+	var req AddMeetingRequest
+	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	/*users := make([]User, len(m.Guests) + 1)
-	users[0].Username = m.Hostname
-	for i, _ := range m.Guests {
-		users[i+1].Username = m.Guests[i]
+	/*users := make([]User, len(req.Guests) + 1)
+	users[0].Username = req.Hostname
+	for i, _ := range req.Guests {
+		users[i+1].Username = req.Guests[i]
 	}*/
 
 	var retrievedUsers []User
-	allUsers := append(m.Guests, m.Hostname)
+	allUsers := append(req.Guests, req.Hostname)
 	Db.Where("username IN (?)", allUsers).Find(&retrievedUsers)
 
 	createdMeeting := Meeting{
-		MeetingName: m.MeetingName,
-		HostName:    m.Hostname,
-		StartDate:   m.StartDate,
-		EndDate:     m.EndDate,
-		Frequency:   MeetingFrequency(m.Frequency),
+		MeetingName: req.MeetingName,
+		HostName:    req.Hostname,
+		StartDate:   req.StartDate,
+		EndDate:     req.EndDate,
+		Frequency:   MeetingFrequency(req.Frequency),
+		Slots:       []MeetingSlot{},
 	}
 	Db.Create(&createdMeeting)
 
-	// Append users
-	err = Db.Model(&createdMeeting).Association("Guests").Append(&retrievedUsers).Error
+	for _, user := range retrievedUsers {
+		Db.Model(&user).Association("Meetings").Append(&createdMeeting)
+		// Db.Model(&createdMeeting).Association("Guests").Append(&retrievedUsers)
 
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+		slot := MeetingSlot{
+			MeetingID:             createdMeeting.ID,
+			UserID:                user.ID,
+			DefaultDecision:       Unknown,
+			OppositeDecisionDates: []time.Time{},
+		}
+		Db.Create(&slot)
+		Db.Model(&createdMeeting).Association("MeetingSlots").Append(&slot)
 	}
 
 	log.Printf("Added meeting: %v", createdMeeting)

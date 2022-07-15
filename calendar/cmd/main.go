@@ -25,16 +25,14 @@ func main() {
 	internal.Db.LogMode(true)
 	internal.Db.AutoMigrate(&internal.User{})
 	internal.Db.AutoMigrate(&internal.Meeting{})
+	internal.Db.AutoMigrate(&internal.MeetingSlot{})
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/add-user", internal.AddUser)
 	mux.HandleFunc("/add-meeting", internal.AddMeeting)
 	mux.HandleFunc("/get-meeting", internal.GetMeeting)
-	// param: username, meeting_name, accept(true/false)
 	mux.HandleFunc("/decide-on-meeting", internal.DecideOnMeeting)
-	// param: username, time, length
 	mux.HandleFunc("/get-user-meetings", internal.GetUserMeetings)
-	// param: []names, length
 	mux.HandleFunc("/get-closest-meeting", internal.GetClosestMeeting)
 
 	// Helper methods

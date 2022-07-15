@@ -26,20 +26,21 @@ func AddUser(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf("Method: expected %v, got %v", expectedMethod, r.Method), http.StatusBadRequest)
 	}
 
-	var u AddUserRequest
-	err := json.NewDecoder(r.Body).Decode(&u)
+	var req AddUserRequest
+	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	user := &User{Username: u.Username}
+	user := &User{Username: req.Username}
 	res := Db.Create(user)
 	if res.Error != nil {
 		http.Error(w, res.Error.Error(), http.StatusBadRequest)
 		return
 	}
-	log.Printf("Added user: %v", u)
+
+	log.Printf("Added user: %v", req)
 
 	_, _ = w.Write([]byte(fmt.Sprint(user)))
 	//_, _ = w.Write([]byte(fmt.Sprintf("User id: %v", user.ID)))
