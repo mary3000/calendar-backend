@@ -75,5 +75,11 @@ func DecideOnMeeting(w http.ResponseWriter, r *http.Request) {
 	}
 	log.Printf("Decided on slot: %+v", slot)
 
-	_, _ = w.Write([]byte(fmt.Sprintf("%v", slot)))
+	payloadBytes, err := json.Marshal(slot)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	_, _ = w.Write(payloadBytes)
 }

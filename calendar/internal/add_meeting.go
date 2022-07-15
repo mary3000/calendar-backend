@@ -66,7 +66,15 @@ func AddMeeting(w http.ResponseWriter, r *http.Request) {
 		Db.Model(&createdMeeting).Association("MeetingSlots").Append(&slot)
 	}
 
+	Db.Preload("Guests").Preload("Slots").Find(&createdMeeting)
+
 	log.Printf("Added meeting: %+v", createdMeeting)
 
-	_, _ = w.Write([]byte(fmt.Sprint(createdMeeting.ID)))
+	payloadBytes, err := json.Marshal(createdMeeting)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	_, _ = w.Write(payloadBytes)
 }

@@ -42,6 +42,11 @@ func AddUser(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("Added user: %+v", user)
 
-	_, _ = w.Write([]byte(fmt.Sprint(user.ID)))
-	//_, _ = w.Write([]byte(fmt.Sprintf("User id: %v", user.ID)))
+	payloadBytes, err := json.Marshal(user)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	_, _ = w.Write(payloadBytes)
 }

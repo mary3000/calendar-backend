@@ -155,25 +155,3 @@ func GetMeetings(ms MeetingSlot, m Meeting, begin time.Time, end time.Time) []Me
 
 	return acceptedTimes
 }
-
-/*func GetDailyMeetings(ms MeetingSlot, m Meeting, begin time.Time, end time.Time) {
-	cur := m.StartDate
-	if cur.Before(begin) {
-		diff := cur.Sub(begin)
-		cur.Add(Day * time.Duration(diff.Hours() / 24))
-		if cur.Before(begin) {
-			cur.Add(Day)
-		}
-	}
-
-	acceptedTimes := make([]MeetingTimeSlot, 0)
-
-	for !(cur.After(end)) {
-		acceptedTimes = append(acceptedTimes, MeetingTimeSlot{
-			Slot:              ms,
-			ConcreteTimeStart: cur,
-			ConcreteTimeEnd:   cur.Add(m.EndDate.Sub(m.StartDate)),
-		})
-		cur.Add(Day)
-	}
-}*/

@@ -15,12 +15,11 @@ type User struct {
 }
 
 // Types of meetings:
-// 1) Unaccepted meeting
-// 2) No-repeated meeting
-// 3) Daily m.
-// 4) Weekly
-// 5) Monthly
-// 6) Annually
+// 1) Unrepeated meeting
+// 2) Daily m.
+// 3) Weekly
+// 4) Monthly
+// 5) Annually
 
 type MeetingFrequency string
 
