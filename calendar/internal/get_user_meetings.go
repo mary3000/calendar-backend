@@ -42,8 +42,8 @@ func GetUserMeetings(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	u := User{Username: req.Username}
-	Db. /*.Preload("Meetings").Preload("Slots")*/ First(&u)
+	var u User
+	Db. /*.Preload("Meetings").Preload("Slots")*/ Where("username = ?", req.Username).First(&u)
 
 	var meetingSlots []MeetingSlot
 	Db.Where("user_id = ?", u.ID).Find(&meetingSlots)
