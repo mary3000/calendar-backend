@@ -46,7 +46,7 @@ func GetUserMeetings(w http.ResponseWriter, r *http.Request) {
 	Db. /*.Preload("Meetings").Preload("Slots")*/ First(&u)
 
 	var meetingSlots []MeetingSlot
-	Db.Find("UserID = ?", u.ID).Find(&meetingSlots)
+	Db.Where("user_id = ?", u.ID).Find(&meetingSlots)
 
 	mts := GetMeetingsInInterval(meetingSlots, req.BeginDate, req.EndDate)
 

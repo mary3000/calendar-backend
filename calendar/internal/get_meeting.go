@@ -13,7 +13,6 @@ type GetMeetingRequest struct {
 	MeetingID uint
 }
 
-// param: hostname, meeting_name (unique per user!)
 func GetMeeting(w http.ResponseWriter, r *http.Request) {
 	contentType := r.Header.Get("Content-type")
 	expectedContentType := "application/json"

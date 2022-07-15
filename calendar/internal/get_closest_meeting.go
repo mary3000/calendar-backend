@@ -13,7 +13,6 @@ type GetClosesMeetingRequest struct {
 	Duration string
 }
 
-// param: []names, length
 func GetClosestMeeting(w http.ResponseWriter, r *http.Request) {
 	contentType := r.Header.Get("Content-type")
 	expectedContentType := "application/json"
@@ -40,7 +39,7 @@ func GetClosestMeeting(w http.ResponseWriter, r *http.Request) {
 
 	meetingSlots := make([][]MeetingSlot, len(users))
 	for i := range users {
-		Db.Where("UserID = ?", users[i]).Find(&meetingSlots[i])
+		Db.Where("user_id = ?", users[i]).Find(&meetingSlots[i])
 	}
 
 	curTime := time.Now().Add(time.Minute)

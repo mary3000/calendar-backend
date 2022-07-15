@@ -54,12 +54,15 @@ func AddMeeting(w http.ResponseWriter, r *http.Request) {
 
 	for _, user := range retrievedUsers {
 		Db.Model(&user).Association("Meetings").Append(&createdMeeting)
-		// Db.Model(&createdMeeting).Association("Guests").Append(&retrievedUsers)
 
+		decision := Unknown
+		if user.Username == req.Hostname {
+			decision = Accepted
+		}
 		slot := MeetingSlot{
 			MeetingID:             createdMeeting.ID,
 			UserID:                user.ID,
-			DefaultDecision:       Unknown,
+			DefaultDecision:       decision,
 			OppositeDecisionDates: []time.Time{},
 		}
 		Db.Create(&slot)

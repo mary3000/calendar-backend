@@ -11,7 +11,6 @@ type AddUserRequest struct {
 	Username string
 }
 
-// param: name
 func AddUser(w http.ResponseWriter, r *http.Request) {
 	contentType := r.Header.Get("Content-type")
 	expectedContentType := "application/json"

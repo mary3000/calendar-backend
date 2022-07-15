@@ -16,7 +16,6 @@ type DecideOnMeetingRequest struct {
 	Date      time.Time
 }
 
-// param: username, meeting_name, accept(true/false)
 func DecideOnMeeting(w http.ResponseWriter, r *http.Request) {
 	contentType := r.Header.Get("Content-type")
 	expectedContentType := "application/json"
@@ -38,11 +37,8 @@ func DecideOnMeeting(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	slot := MeetingSlot{
-		MeetingID: req.MeetingID,
-		UserID:    req.UserID,
-	}
-	Db.First(&slot)
+	var slot MeetingSlot
+	Db.Where("meeting_id = ? AND user_id = ?", req.MeetingID, req.UserID).First(&slot)
 
 	if req.Date.IsZero() {
 		if req.Accepted {
@@ -68,7 +64,7 @@ func DecideOnMeeting(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	res := Db.Save(slot)
+	res := Db.Save(&slot)
 	if res.Error != nil {
 		http.Error(w, res.Error.Error(), http.StatusBadRequest)
 		return
